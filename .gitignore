@@ -8,6 +8,17 @@
 *.gch
 *.pch
 
+# Visual Studio files
+*.vcxproj
+*.opensdf
+*.sln
+*.suo
+*.filters
+/bin
+/Debug
+/ipch/calculadordeperimetros-8259d8a5
+
+
 # Compiled Dynamic libraries
 *.so
 *.dylib
