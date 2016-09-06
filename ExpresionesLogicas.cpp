@@ -1,41 +1,59 @@
 // ExpresionesLogicas.cpp : Defines the entry point for the console application.
 //
 #include <iostream>
-#include <vector>
-#include <string>
-#include "TablaDeVerdad.h";
-using std::cin;
-using std::cout;
+#include <array>
+#include "TablaDeVerdad.h"
 
 int main()
 {
-	cout << "Ingrese la cantidad de conectores que desee agregar\n";
-	int cantConectores;
-	cin >> cantConectores;
-	vector<char> conectores(cantConectores);
-	string mensaje = "Ingrese los conectores que desee agregar en orden.\n!: Negacion\n|: Disyuncion\n&: Conjuncion\n>: Condicional\n<: Bicondicional\n";
-	cout << mensaje;
-	char aux;
-	int eol = 0;
-	for (int i = 0; i < cantConectores; i++){
-		cin >> aux;
-		if (aux == '|' || aux == '&' || aux == '>' || aux == '<' || aux == '!')
+	array<char, 3> preposiciones;
+	array<char, 2> conectores;
+	array<bool, 3> negado = { false, false, false };
+	bool flag;
+	for (int i = 0; i < preposiciones.size(); i++){
+		cin >> preposiciones.at(i);
+		if (conectores.size() != i)
 		{
-			eol = 0;
-			conectores[i] = aux;
-		}
-		else{
-			cout << "\nDebe ingresar un caracter valido.\n" << mensaje;
-			i--;
-			eol++;
-			if (eol == 3)
+			do
 			{
-				cout << "\nDemasiados intentos fallidos. Programa terminado.";
-				return 0;
-			}
+				flag = false;
+				int eol = 0;
+				char aux;
+				cin >> aux;
+				if (aux == '|' || aux == '&' || aux == '>' || aux == '<')
+				{
+					eol = 0;
+					conectores.at(i) = aux;
+				}
+				else{
+					flag = true;
+					if (aux == '!')
+					{
+						eol = 0;
+						negado.at(i) = true;
+					}
+					else
+					{						
+						cout << "\nDebe ingresar un caracter valido.\n" << "Ingrese los conectores que desee agregar en orden.\n!: Negacion\n|: Disyuncion\n&: Conjuncion\n>: Condicional\n<: Bicondicional\n";
+						eol++;
+						if (eol == 3)
+						{
+							cout << "\nDemasiados intentos fallidos. Programa terminado.";
+							return 0;
+						}
+					}
+				}
+				
+			} while (flag);
+		}		
+		else
+		{
+			char ultimoNegado;
+			cin >> ultimoNegado;
+			if (ultimoNegado == '!')
+				negado.at(i) = true;
 		}
 	}
-	cout << TablaDeVerdad::getRtaTipoProposicion(conectores);
-	return 0;
+	TablaDeVerdad::getRtaTipoProposicion(preposiciones, conectores, negado);
 }
 

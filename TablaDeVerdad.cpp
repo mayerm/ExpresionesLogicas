@@ -1,13 +1,11 @@
 #include "TablaDeVerdad.h"
 
-string TablaDeVerdad::getRtaTipoProposicion(vector<char> connectors){
-	
-	vector<bool> proposicionesRecorridas;
-	for (int i = 0; i < connectors.size(); i++)
-	{
-		proposicionesRecorridas = getPropAnteriores(connectors[i], proposicionesRecorridas);
-	}
-	return getTipoProposicion(proposicionesRecorridas);	 
+
+bool TablaDeVerdad::estaNegado(bool value, bool negation){
+	if (negation)
+		return !value;
+	else
+		return value;
 }
 
 bool TablaDeVerdad::getValorDeVerdad(bool p, bool q, char conector){
@@ -37,37 +35,8 @@ bool TablaDeVerdad::getValorDeVerdad(bool p, bool q, char conector){
 	}
 }
 
-vector<bool> TablaDeVerdad::getPropAnteriores(char conector, vector<bool> propAnt){
-	
-	if (propAnt.empty())	
-		propAnt = { true, true, false, false };	
-	if (conector == '!')
-	{
-		for(int i = 0; i < propAnt.size(); i++)
-		{
-			propAnt[i] = !propAnt[i];
-		}
-		return propAnt;
-	}
-	for (int i = 0; i < propAnt.size(); i++)
-	{
-		switch (i){
-		case 0:
-		case 2:
-			propAnt[i] = getValorDeVerdad(propAnt[i], true, conector);
-			break;
-		case 1:
-		default:
-			propAnt[i] = getValorDeVerdad(propAnt[i], false, conector);
-			break;
-		}
-	}
-	return  propAnt;
-}
-
-
-
-string TablaDeVerdad::getTipoProposicion(vector<bool> propFinal){
+template <size_t n>
+void TablaDeVerdad::getTipoProposicion(array<bool, n> propFinal){
 	int cantVerdaderos = 0;
 	for (int i = 0; i < propFinal.size(); i++)
 	{
@@ -75,10 +44,68 @@ string TablaDeVerdad::getTipoProposicion(vector<bool> propFinal){
 			cantVerdaderos++;
 	}
 	if (cantVerdaderos == 0)
-		return "Contradiccion";
-	else if (cantVerdaderos == 4)
-		return "Tautologia";
-		else
-			return "Contingencia";
+		cout << "Contradiccion";
+	else if (cantVerdaderos == propFinal.size())
+		cout << "Tautologia";
+	else
+		cout << "Contingencia";
 }
 
+void TablaDeVerdad::getRtaTipoProposicion(array<char, 3> a, array<char, 2> b, array<bool, 3> c){
+	if (a[0] == a[1] && a[1] == a[2])
+	{
+		array<bool, 2> finalResult = {
+			TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::estaNegado(true, c.at(0)), TablaDeVerdad::estaNegado(true, c.at(1)), b.at(0)), TablaDeVerdad::estaNegado(true, c.at(2)), b.at(1)),
+			TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::estaNegado(false, c.at(0)), TablaDeVerdad::estaNegado(false, c.at(1)), b.at(0)), TablaDeVerdad::estaNegado(false, c.at(2)), b.at(1))
+		};
+		getTipoProposicion(finalResult);
+	}
+	else
+	{
+		if (a[0] == a[1]){
+
+			array<bool, 4> finalResult = {
+				TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::estaNegado(true, c.at(0)), TablaDeVerdad::estaNegado(true, c.at(1)), b.at(0)), TablaDeVerdad::estaNegado(true, c.at(2)), b.at(1)),
+				TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::estaNegado(true, c.at(0)), TablaDeVerdad::estaNegado(true, c.at(1)), b.at(0)), TablaDeVerdad::estaNegado(false, c.at(2)), b.at(1)),
+				TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::estaNegado(false, c.at(0)), TablaDeVerdad::estaNegado(false, c.at(1)), b.at(0)), TablaDeVerdad::estaNegado(true, c.at(2)), b.at(1)),
+				TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::estaNegado(false, c.at(0)), TablaDeVerdad::estaNegado(false, c.at(1)), b.at(0)), TablaDeVerdad::estaNegado(false, c.at(2)), b.at(1))
+			};
+			getTipoProposicion(finalResult);
+		}
+		else if (a[1] == a[2]){
+
+			array<bool, 4> finalResult = {
+				TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::estaNegado(true, c.at(0)), TablaDeVerdad::estaNegado(true, c.at(1)), b.at(0)), TablaDeVerdad::estaNegado(true, c.at(2)), b.at(1)),
+				TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::estaNegado(false, c.at(0)), TablaDeVerdad::estaNegado(true, c.at(1)), b.at(0)), TablaDeVerdad::estaNegado(true, c.at(2)), b.at(1)),
+				TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::estaNegado(true, c.at(0)), TablaDeVerdad::estaNegado(false, c.at(1)), b.at(0)), TablaDeVerdad::estaNegado(false, c.at(2)), b.at(1)),
+				TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::estaNegado(false, c.at(0)), TablaDeVerdad::estaNegado(false, c.at(1)), b.at(0)), TablaDeVerdad::estaNegado(false, c.at(2)), b.at(1))
+			};
+			getTipoProposicion(finalResult);
+		}
+		else if (a[0] == a[2]){
+			array<bool, 4> finalResult = {
+				TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::estaNegado(true, c.at(0)), TablaDeVerdad::estaNegado(true, c.at(1)), b.at(0)), TablaDeVerdad::estaNegado(true, c.at(2)), b.at(1)),
+				TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::estaNegado(true, c.at(0)), TablaDeVerdad::estaNegado(false, c.at(1)), b.at(0)), TablaDeVerdad::estaNegado(true, c.at(2)), b.at(1)),
+				TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::estaNegado(false, c.at(0)), TablaDeVerdad::estaNegado(true, c.at(1)), b.at(0)), TablaDeVerdad::estaNegado(false, c.at(2)), b.at(1)),
+				TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::estaNegado(false, c.at(0)), TablaDeVerdad::estaNegado(false, c.at(1)), b.at(0)), TablaDeVerdad::estaNegado(false, c.at(2)), b.at(1))
+			};
+			getTipoProposicion(finalResult);
+		}
+		else
+		{
+			array<bool, 8> finalResult = {
+				TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::estaNegado(true, c.at(0)), TablaDeVerdad::estaNegado(true, c.at(1)), b.at(0)), TablaDeVerdad::estaNegado(true, c.at(2)), b.at(1)),
+				TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::estaNegado(true, c.at(0)), TablaDeVerdad::estaNegado(true, c.at(1)), b.at(0)), TablaDeVerdad::estaNegado(false, c.at(2)), b.at(1)),
+				TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::estaNegado(true, c.at(0)), TablaDeVerdad::estaNegado(false, c.at(1)), b.at(0)), TablaDeVerdad::estaNegado(true, c.at(2)), b.at(1)),
+				TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::estaNegado(false, c.at(0)), TablaDeVerdad::estaNegado(true, c.at(1)), b.at(0)), TablaDeVerdad::estaNegado(true, c.at(2)), b.at(1)),
+				TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::estaNegado(true, c.at(0)), TablaDeVerdad::estaNegado(false, c.at(1)), b.at(0)), TablaDeVerdad::estaNegado(false, c.at(2)), b.at(1)),
+				TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::estaNegado(false, c.at(0)), TablaDeVerdad::estaNegado(true, c.at(1)), b.at(0)), TablaDeVerdad::estaNegado(false, c.at(2)), b.at(1)),
+				TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::estaNegado(false, c.at(0)), TablaDeVerdad::estaNegado(false, c.at(1)), b.at(0)), TablaDeVerdad::estaNegado(true, c.at(2)), b.at(1)),
+				TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::getValorDeVerdad(TablaDeVerdad::estaNegado(false, c.at(0)), TablaDeVerdad::estaNegado(false, c.at(1)), b.at(0)), TablaDeVerdad::estaNegado(false, c.at(2)), b.at(1))
+			};
+			getTipoProposicion(finalResult);
+		}
+
+	}
+
+}
